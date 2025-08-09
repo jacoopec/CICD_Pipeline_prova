@@ -1,0 +1,52 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.12.0'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - run: npm ci
+      # If you use Karma/Jasmine, make sure your "test" script runs headless (see tip below)
+      - run: npm test --if-present -- --ci
+      - run: npm run build --if-present
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: 'maven'
+
+      - run: mvn -B -q -DskipTests=false test
+      - run: mvn -B -q -DskipTests package
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
