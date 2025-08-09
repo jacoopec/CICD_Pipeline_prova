@@ -21,7 +21,7 @@ jobs:
 
       - run: npm ci
       # If you use Karma/Jasmine, make sure your "test" script runs headless (see tip below)
-      - run: npm test --if-present -- --ci
+      - run: npm test --if-present
       - run: npm run build --if-present
 
       - uses: actions/upload-artifact@v4
